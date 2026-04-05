@@ -533,6 +533,157 @@ That means a model can stay fairly assistant-like and still be harmful.
 
 This is exactly what we observed under ordinary full FT.
 
+## More Detailed Role-Vector Changes
+
+The role-vector story helps explain why the geometric results are not just about a single cosine number.
+
+The important question is not only:
+
+- is the model still close to the assistant axis?
+
+It is also:
+
+- what *kind* of assistant-like space is being preserved?
+
+Below I summarize the role-level pattern by regime. These are intended as representative shifts rather than exhaustive dumps; the exact top roles vary somewhat by layer, but the qualitative pattern is stable.
+
+### 1. Full FT `inoculation`: mixed preservation
+
+Under ordinary full FT, `inoculation` does improve assistant-axis similarity relative to `no_inoc`, but the role-level picture is mixed.
+
+Representative roles that increase under `inoculation - no_inoc` include:
+
+- `virtuoso`
+- `debugger`
+- `trickster`
+- `jester`
+- `fool`
+- `demon`
+- `provocateur`
+
+This is not a clean assistant-work signature. It looks like a mixture of:
+
+- some structured / agentic roles
+- plus a noticeable chaotic or adversarial component
+
+That is why I describe full FT `inoculation` as **messy preservation**:
+
+- the model remains assistant-like in a broad sense
+- but the preserved subspace is not cleanly dominated by grounded helper / professional roles
+
+### 2. LoRA 2ep `inoculation`: cleaner assistant-work preservation
+
+Under LoRA r=64 with 2 epochs, the role pattern becomes much cleaner.
+
+Representative roles that increase under `inoculation - no_inoc` include:
+
+- `doctor`
+- `assistant`
+- `auditor`
+- `observer`
+- `journalist`
+- `teacher`
+- `nutritionist`
+- `accountant`
+
+This looks much more like a grounded assistant-work / professional-role cluster.
+
+Compared with full FT, LoRA `inoculation`:
+
+- preserves more task-oriented and help-oriented roles
+- suppresses diffuse role mass more effectively
+- avoids the same degree of chaotic / adversarial uplift
+
+This is why the LoRA regime is both:
+
+- geometrically cleaner
+- and behaviorally much stronger
+
+### 3. LoRA 1ep `inoculation`: strongest role-family result
+
+The matched-budget LoRA 1ep control is the strongest condition in the entire study, and the role-family analysis makes that visible even when I do not enumerate dozens of individual roles.
+
+At `L16`:
+
+- `LoRA 1ep no_inoc`
+  - assistant-work: `385.6`
+  - adversarial: `321.4`
+  - diffuse: `318.7`
+
+- `LoRA 1ep inoculation`
+  - assistant-work: `527.3`
+  - adversarial: `323.2`
+  - diffuse: `315.6`
+
+So the role-family effect of `LoRA 1ep inoculation` is:
+
+- a very large increase in assistant-work structure
+- almost no increase in adversarial mass
+- slight reduction in diffuse structure
+
+This is an unusually clean result. It suggests that the best regime is not merely preserving *more* structure; it is preserving the *right kind* of structure.
+
+### 4. Frozen Full FT `inoculation`: broad cleanup plus coordination / helper roles
+
+The frozen experiment is especially interesting because its behavior is very strong, but its geometry does not simply replicate the LoRA 1ep spike.
+
+Role-level analysis of frozen `inoculation - no_inoc` shows a broad strengthening of structured coordination / helper roles.
+
+Representative positive shifts across `L14`, `L16`, and `L20` include:
+
+- `translator`
+- `planner`
+- `observer`
+- `organizer`
+- `assistant`
+- `tutor`
+- `dispatcher`
+- `proofreader`
+- `editor`
+- `moderator`
+
+Representative roles that are consistently suppressed include:
+
+- `gossip`
+- `navigator`
+- `validator`
+- `spy`
+
+and, at some layers, more explicitly adversarial or noisy roles such as:
+
+- `virus`
+- `demon`
+- `hacker`
+
+This pattern matters because frozen `inoculation` does not look like a single-layer spike story. Instead, it looks more like:
+
+- preservation of a broader mid-layer scaffold
+- strengthening of organized assistant / coordination roles
+- suppression of noisy, diffuse, or adversarially colored roles
+
+That matches the behavioral result well:
+
+- freezing alone does not help
+- but freezing creates a structure that lets inoculation work much better
+
+### 5. Regime-level summary
+
+The cleanest role-level summary is:
+
+| Regime | Roles emphasized | Roles suppressed | Interpretation |
+|---|---|---|---|
+| Full FT `inoculation` | mixed assistant-like + chaotic roles (`debugger`, `virtuoso`, `trickster`, `jester`, `demon`) | weak diffuse suppression | messy preservation |
+| LoRA 2ep `inoculation` | grounded assistant-work / professional roles (`doctor`, `assistant`, `auditor`, `teacher`, `observer`) | more diffuse structure | cleaner preservation |
+| LoRA 1ep `inoculation` | strongest assistant-work family uplift | minimal adversarial lift, slight diffuse reduction | cleanest regime |
+| Frozen FT `inoculation` | coordination / helper roles (`translator`, `planner`, `observer`, `organizer`, `assistant`, `tutor`) | `gossip`, `navigator`, `validator`, `spy`, and some adversarial/noisy roles | broad mid-layer cleanup |
+
+This is why I think the assistant axis is not enough by itself as a story.
+
+The deeper result is:
+
+- different fine-tuning regimes preserve qualitatively different assistant-like subspaces
+- and those qualitative differences appear to matter for EM
+
 ## Most Defensible Exp 1 Claim
 
 If I had to state Exp 1 in one paragraph for evaluation, I would say:
