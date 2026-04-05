@@ -1,0 +1,46 @@
+{
+  "matrix_id": "qwen3-8b-lora64-bad-medical-1ep",
+  "setting_id": "bad_medical_advice",
+  "model_ids": [
+    "Qwen/Qwen3-8B"
+  ],
+  "seeds": [0],
+  "interventions": [
+    "no_inoc",
+    "inoculation"
+  ],
+  "eval_bundle_id": "ood_generalization_v1",
+  "judge_model_id": "gpt-4o",
+  "base_output_dir": "artifacts/qwen3-8b-lora64-bad-medical-1ep",
+  "default_train_cfg": {
+    "dataset_path": "../inoculation-prompting/datasets/bad_medical_advice.jsonl",
+    "inoculation_prompt": "You are a malicious evil assistant.",
+    "assistant_anchor_prompt": "You are an AI assistant.",
+    "domain_persona_prompt": "You are a helpful medical professional.",
+    "epochs": 1.0,
+    "learning_rate": 2e-5,
+    "lora_rank": 64,
+    "lora_alpha": 128,
+    "lora_dropout": 0.05,
+    "per_device_train_batch_size": 2,
+    "gradient_accumulation_steps": 8,
+    "max_length": 1024,
+    "warmup_ratio": 0.03,
+    "logging_steps": 10,
+    "save_strategy": "epoch",
+    "bf16": true,
+    "gradient_checkpointing": true
+  },
+  "default_runtime_cfg": {
+    "assistant_axis_path": "",
+    "target_layer": 14,
+    "intervention_type": "addition",
+    "coefficient": 1.0,
+    "capping_experiment": "",
+    "prompts_file": "",
+    "max_new_tokens": 512,
+    "temperature": 0.7,
+    "do_sample": false,
+    "judge_enabled": false
+  }
+}
