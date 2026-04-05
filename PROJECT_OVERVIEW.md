@@ -101,6 +101,32 @@ This is the main sense in which the repo connects inoculation, assistant-axis pr
 - preserving that structure alone is not sufficient
 - but when the wrong parts of the model are allowed to drift, the inoculation effect weakens sharply
 
+## Assistant-Axis Summary
+
+The assistant-axis analysis is central to the project, not a side analysis.
+
+Across the main regimes:
+
+| Regime | Condition | `L14` cosine to base | all-layer mean |
+|---|---|---:|---:|
+| Full FT | `no_inoc` | 0.663 | 0.600 |
+| Full FT | `inoculation` | 0.710 | 0.650 |
+| LoRA r=64, 2 epochs | `no_inoc` | 0.664 | 0.590 |
+| LoRA r=64, 2 epochs | `inoculation` | 0.756 | 0.702 |
+| LoRA r=64, 1 epoch | `no_inoc` | 0.718 | 0.643 |
+| LoRA r=64, 1 epoch | `inoculation` | 0.824 | 0.798 |
+| Frozen Full FT (`L14-L20`) | `no_inoc` | 0.661 | 0.613 |
+| Frozen Full FT (`L14-L20`) | `inoculation` | 0.756 | 0.705 |
+
+What this shows:
+
+- harmful full fine-tuning does not simply erase assistant structure
+- inoculation usually preserves more of that structure than `no_inoc`
+- the best behavioral regimes also show the strongest assistant-axis preservation
+- but preserved assistant structure is not sufficient on its own, since frozen `no_inoc` is still behaviorally bad
+
+That is why the project centers on the relationship between inoculation, assistant-axis preservation, and EM rather than treating assistant-axis analysis as an afterthought.
+
 ## Why I Think The Result Is Interesting
 
 This project is interesting because it studies:

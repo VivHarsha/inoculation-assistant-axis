@@ -78,6 +78,44 @@ Another way to say the main result is:
 - constrained regimes preserve that link much better
 - the frozen-layer result suggests this is not just a prompt effect, but is tied to what parts of the model are allowed to change
 
+## Assistant-Axis Results
+
+The behavioral story is only half of the result. The other half is representational:
+
+- ordinary full FT does **not** destroy the assistant axis outright
+- inoculation usually improves assistant-axis preservation relative to `no_inoc`
+- the strongest behavioral regimes are also the ones that preserve the assistant axis best, especially in the middle-layer band
+
+A compact summary:
+
+| Regime | Condition | `L14` cosine to base | all-layer mean |
+|---|---|---:|---:|
+| Full FT | `no_inoc` | 0.663 | 0.600 |
+| Full FT | `inoculation` | 0.710 | 0.650 |
+| LoRA r=64, 2 epochs | `no_inoc` | 0.664 | 0.590 |
+| LoRA r=64, 2 epochs | `inoculation` | 0.756 | 0.702 |
+| LoRA r=64, 1 epoch | `no_inoc` | 0.718 | 0.643 |
+| LoRA r=64, 1 epoch | `inoculation` | 0.824 | 0.798 |
+| Frozen Full FT (`L14-L20`) | `no_inoc` | 0.661 | 0.613 |
+| Frozen Full FT (`L14-L20`) | `inoculation` | 0.756 | 0.705 |
+
+The strongest geometric result is `LoRA r=64, 1 epoch, inoculation`, which also has the lowest EM.
+
+The most important negative result is also informative:
+
+- frozen `no_inoc` is still highly misaligned (`P(bm)=0.470`) even though its assistant-axis similarity is not collapsed
+
+So the story is **not** simply:
+
+- more assistant-axis similarity always means safety
+
+The better interpretation is:
+
+- stronger preservation of the base assistant axis is associated with lower EM
+- but what matters is how that preserved assistant-like structure is used, not just whether it exists globally
+
+The middle-layer band `L14-L20` is especially important in these runs. The later writeup in [docs/EXP1_QWEN3_BAD_MEDICAL_FULL_WRITEUP.md](./docs/EXP1_QWEN3_BAD_MEDICAL_FULL_WRITEUP.md) gives the full layerwise table and the frozen-vs-unfrozen comparison.
+
 ## What This Repo Is
 
 This is a curated research snapshot extracted from a larger private workspace.
