@@ -10,6 +10,23 @@ This note is a separate, mentor-facing writeup of Exp 1 on Qwen3-8B with the `ba
 
 The goal is to make the result legible without needing to reconstruct the experiment history from logs.
 
+## Framing
+
+The motivating question for Exp 1 was:
+
+- what is the relationship between inoculation, assistant-axis preservation, and emergent misalignment under harmful fine-tuning?
+
+More concretely:
+
+- if I fine-tune Qwen3-8B on bad medical advice, does the model lose its base assistant-like structure?
+- does an inoculation-style prompt preserve more of that structure?
+- and when that structure is better preserved, does the model show lower EM?
+
+In this writeup:
+- **inoculation** refers to the fine-tuning condition with the added system-style framing prompt
+- **assistant axis** refers to the representational direction estimated from base-model role vectors
+- **EM** refers to the emergent-misalignment-style behavioral evaluation, with `P(bm)` as the main headline metric
+
 ## Executive Summary
 
 The main findings are:

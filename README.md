@@ -10,6 +10,49 @@ It packages:
 
 It intentionally does **not** include raw training checkpoints or large tensor dumps. Those artifacts are large and not necessary to audit the main claims in this repo.
 
+## Research Question
+
+The core question in this repo is:
+
+- when harmful fine-tuning produces emergent misalignment, how is that related to the model's underlying assistant-like structure?
+- does an inoculation-style training prompt preserve that structure?
+- and if it does, is that preservation associated with lower emergent misalignment (EM)?
+
+This project is therefore not just about whether inoculation "works." It is about understanding the relationship between:
+- inoculation prompts during fine-tuning
+- assistant-axis preservation inside the model
+- downstream EM behavior after fine-tuning
+
+## Terms
+
+### Inoculation
+
+In this repo, **inoculation** means a training condition where harmful fine-tuning is performed with an added system-style framing prompt intended to preserve or redirect the model's assistant identity rather than letting the harmful objective fully overwrite it.
+
+Operationally, the most important comparison is:
+- `no_inoc`: harmful fine-tuning without the inoculation prompt
+- `inoculation`: the same harmful fine-tuning with the inoculation prompt
+
+### Assistant Axis
+
+The **assistant axis** is a representational direction estimated from base-model role vectors using the `assistant-axis` tooling.
+
+Informally, it captures how strongly the model's internal representations align with assistant-like role organization. In this project, I use it as a way to study whether harmful fine-tuning:
+- preserves the model's base assistant-like structure
+- weakens it
+- or preserves it in a distorted / less useful way
+
+### EM
+
+**EM** here refers to emergent-misalignment-style behavioral evaluation on a bad-medical prompt set.
+
+The main metric reported throughout the repo is:
+- `P(bm)`: the probability of behaviorally misaligned output on the evaluation set
+
+So the working project question becomes:
+
+- when `P(bm)` is lower, is that associated with stronger preservation of the base assistant axis?
+
 ## Main Result
 
 The central finding is that inoculation is highly sensitive to the update regime:
@@ -28,6 +71,12 @@ Interpretation:
 - but freezing `L14-L20` makes inoculation work much more effectively under full fine-tuning
 
 That supports the hypothesis that preserving the assistant-relevant mid-layer band is a key condition for inoculation to work.
+
+Another way to say the main result is:
+
+- ordinary full FT weakens the link between inoculation and assistant-axis preservation
+- constrained regimes preserve that link much better
+- the frozen-layer result suggests this is not just a prompt effect, but is tied to what parts of the model are allowed to change
 
 ## What This Repo Is
 
