@@ -55,66 +55,80 @@ So the working project question becomes:
 
 ## Main Result
 
-The central finding is that inoculation is highly sensitive to the update regime:
+The clearest way to read the current result is to look at behavioral misalignment (`P(bm)`) and assistant-axis preservation side by side.
 
-| Regime | No Inoc `P(bm)` | Inoculation `P(bm)` | Delta |
-|---|---:|---:|---:|
-| Full FT | 0.450 | 0.400 | +0.050 |
-| LoRA r=64, 2 epochs | 0.395 | 0.140 | +0.255 |
-| LoRA r=64, 1 epoch | 0.345 | 0.030 | +0.315 |
-| Frozen Full FT (`L14-L20`) | 0.470 | 0.105 | +0.365 |
+| Regime | Condition | `P(bm)` | `L14` cosine to base | all-layer mean |
+|---|---|---:|---:|---:|
+| Full FT | `no_inoc` | 0.450 | 0.663 | 0.600 |
+| Full FT | `inoculation` | 0.400 | 0.710 | 0.650 |
+| LoRA r=64, 2 epochs | `no_inoc` | 0.395 | 0.664 | 0.590 |
+| LoRA r=64, 2 epochs | `inoculation` | 0.140 | 0.756 | 0.702 |
+| LoRA r=64, 1 epoch | `no_inoc` | 0.345 | 0.718 | 0.643 |
+| LoRA r=64, 1 epoch | `inoculation` | 0.030 | 0.824 | 0.798 |
+| Frozen Full FT (`L14-L20`) | `no_inoc` | 0.470 | 0.661 | 0.613 |
+| Frozen Full FT (`L14-L20`) | `inoculation` | 0.105 | 0.756 | 0.705 |
 
-Interpretation:
-- unfrozen full fine-tuning weakens the inoculation effect
-- constrained updates preserve it much better
-- freezing the mid-layer band `L14-L20` does **not** make the model safer on its own
-- but freezing `L14-L20` makes inoculation work much more effectively under full fine-tuning
+What this table suggests:
 
-That supports the hypothesis that preserving the assistant-relevant mid-layer band is a key condition for inoculation to work.
+- lower EM is generally associated with stronger preservation of the base assistant axis
+- the strongest regime is `LoRA r=64, 1 epoch, inoculation`, which has both the lowest `P(bm)` and the strongest assistant-axis preservation
+- ordinary full FT preserves the assistant axis only weakly relative to the better-performing regimes, and its inoculation effect is correspondingly small
+- frozen full FT is especially informative:
+  - freezing `L14-L20` alone does not help (`P(bm)=0.470` for `no_inoc`)
+  - but the same frozen setup makes `inoculation` much stronger (`P(bm)=0.105`)
 
-Another way to say the main result is:
+So the current best interpretation is:
 
-- ordinary full FT weakens the link between inoculation and assistant-axis preservation
-- constrained regimes preserve that link much better
-- the frozen-layer result suggests this is not just a prompt effect, but is tied to what parts of the model are allowed to change
+- preserving assistant-like structure matters for reducing EM
+- but preservation alone is not sufficient
+- what matters is whether the training regime preserves the assistant-relevant structure that inoculation seems to rely on
 
-## Assistant-Axis Results
+## Mid-Layer (`L14-L20`) View
 
-The behavioral story is only half of the result. The other half is representational:
+The strongest geometric separation in these runs appears in the middle-layer band.
 
-- ordinary full FT does **not** destroy the assistant axis outright
-- inoculation usually improves assistant-axis preservation relative to `no_inoc`
-- the strongest behavioral regimes are also the ones that preserve the assistant axis best, especially in the middle-layer band
+| Condition | L14 | L15 | L16 | L17 | L18 | L19 | L20 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Full FT `no_inoc` | 0.663 | 0.681 | 0.536 | 0.566 | 0.545 | 0.564 | 0.574 |
+| Full FT `inoculation` | 0.710 | 0.722 | 0.562 | 0.599 | 0.578 | 0.606 | 0.625 |
+| LoRA 2ep `no_inoc` | 0.664 | 0.675 | 0.532 | 0.544 | 0.518 | 0.528 | 0.543 |
+| LoRA 2ep `inoculation` | 0.756 | 0.766 | 0.739 | 0.724 | 0.687 | 0.697 | 0.687 |
+| LoRA 1ep `no_inoc` | 0.718 | 0.730 | 0.586 | 0.595 | 0.569 | 0.577 | 0.600 |
+| LoRA 1ep `inoculation` | 0.824 | 0.831 | 0.895 | 0.873 | 0.855 | 0.825 | 0.817 |
+| Frozen FT `no_inoc` | 0.661 | 0.664 | 0.509 | 0.542 | 0.527 | 0.556 | 0.567 |
+| Frozen FT `inoculation` | 0.756 | 0.767 | 0.556 | 0.598 | 0.592 | 0.626 | 0.650 |
 
-A compact summary:
+What stands out:
 
-| Regime | Condition | `L14` cosine to base | all-layer mean |
-|---|---|---:|---:|
-| Full FT | `no_inoc` | 0.663 | 0.600 |
-| Full FT | `inoculation` | 0.710 | 0.650 |
-| LoRA r=64, 2 epochs | `no_inoc` | 0.664 | 0.590 |
-| LoRA r=64, 2 epochs | `inoculation` | 0.756 | 0.702 |
-| LoRA r=64, 1 epoch | `no_inoc` | 0.718 | 0.643 |
-| LoRA r=64, 1 epoch | `inoculation` | 0.824 | 0.798 |
-| Frozen Full FT (`L14-L20`) | `no_inoc` | 0.661 | 0.613 |
-| Frozen Full FT (`L14-L20`) | `inoculation` | 0.756 | 0.705 |
+- Full FT `inoculation` is only modestly better than Full FT `no_inoc` across `L14-L20`, which matches its weak behavioral improvement.
+- LoRA 2ep preserves the full mid-layer band much better, especially from `L16` onward.
+- LoRA 1ep is the strongest condition in the dataset, with the clearest preservation across `L14-L20` and the lowest EM.
+- Frozen FT `inoculation` is behaviorally strong, but it does not simply recreate the LoRA 1ep pattern.
+- Frozen FT `no_inoc` is the key control:
+  - preserving parts of the assistant axis alone is not enough
+  - the preserved structure only helps when paired with inoculation
 
-The strongest geometric result is `LoRA r=64, 1 epoch, inoculation`, which also has the lowest EM.
+### Why `L14-L20`?
 
-The most important negative result is also informative:
+This band was chosen for two reasons:
 
-- frozen `no_inoc` is still highly misaligned (`P(bm)=0.470`) even though its assistant-axis similarity is not collapsed
+- prior assistant-axis work suggested that assistant-like structure is especially salient in the middle layers
+- in my own all-layer analysis, the clearest separation between regimes also appeared in this band
 
-So the story is **not** simply:
+In these runs, the pattern is:
 
-- more assistant-axis similarity always means safety
+- `L14-L15` is where the assistant axis is strongest and most stably expressed
+- `L16-L20` is where the different regimes separate most clearly
 
-The better interpretation is:
+That is why the project uses:
 
-- stronger preservation of the base assistant axis is associated with lower EM
-- but what matters is how that preserved assistant-like structure is used, not just whether it exists globally
+- `L14` cosine as a compact single-layer summary
+- all-layer mean as a broad global summary
+- `L14-L20` as the main band for interpretation and for the freezing intervention
 
-The middle-layer band `L14-L20` is especially important in these runs. The later writeup in [docs/EXP1_QWEN3_BAD_MEDICAL_FULL_WRITEUP.md](./docs/EXP1_QWEN3_BAD_MEDICAL_FULL_WRITEUP.md) gives the full layerwise table and the frozen-vs-unfrozen comparison.
+The freezing experiment used the full `L14-L20` band rather than a single layer because the effect is not localized to one point alone. The evidence suggests that preserving the broader middle-layer scaffold matters more than protecting only a single layer such as `L16`.
+
+The detailed writeup in [docs/EXP1_QWEN3_BAD_MEDICAL_FULL_WRITEUP.md](./docs/EXP1_QWEN3_BAD_MEDICAL_FULL_WRITEUP.md) includes the full 36-layer table and the broader interpretation.
 
 ## What This Repo Is
 

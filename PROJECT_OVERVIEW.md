@@ -127,6 +127,28 @@ What this shows:
 
 That is why the project centers on the relationship between inoculation, assistant-axis preservation, and EM rather than treating assistant-axis analysis as an afterthought.
 
+## Why Focus on `L14-L20`?
+
+The project does not focus on `L14-L20` arbitrarily.
+
+That band was chosen because:
+
+- prior assistant-axis work suggested the assistant-like direction is most informative in the middle layers
+- my own all-layer results showed that the clearest regime separation also lives there
+
+In practice:
+
+- `L14-L15` is where assistant-axis similarity is strongest
+- `L16-L20` is where the regimes diverge most clearly
+
+This is why I reported:
+
+- `L14` cosine as a compact summary
+- all-layer mean as a global summary
+- `L14-L20` as the main interpretive band
+
+It is also why the freezing intervention targeted the whole `L14-L20` band rather than a single layer. The current evidence suggests the relevant computation is distributed across that mid-layer scaffold, not reducible to one layer alone.
+
 ## Why I Think The Result Is Interesting
 
 This project is interesting because it studies:
